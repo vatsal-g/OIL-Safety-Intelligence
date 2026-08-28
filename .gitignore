@@ -1,3 +1,14 @@
+# Environment variables (Crucial for security)
+.env
+.env.*
+!.env.example
+
+# Dependency directories
+node_modules/
+
+# Prisma client and SQLite database artifacts (if any)
+/prisma/generated/
+
 # Logs
 logs
 *.log
@@ -141,3 +152,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# OS specific files
+.DS_Store
+Thumbs.db

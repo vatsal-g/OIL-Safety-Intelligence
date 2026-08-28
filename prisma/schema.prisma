@@ -1,0 +1,85 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================
+// CORE COLLECTION — one document per incoming report
+// ============================================================
+model Report {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // ---- 1. INTAKE (set at ingestion, never changes) ----
+  rawText       String
+  source        String   // "OSHA" | "MSHA" | "BSEE" | "ASRS" | "OIL_synthetic" | "OIL_live"
+  siteId        String?
+  activityTag   String?
+  reportedAt    DateTime @default(now())   // when it entered our system
+  eventDate     DateTime?                  // original incident date (from source dataset)
+
+  // ---- 2. LAYER 1 OUTPUT (always attempted, always present) ----
+  layer1        Layer1Result
+
+  // ---- 3. LAYER 2 OUTPUT (only exists if Layer 1 was inconclusive) ----
+  layer2        Layer2Result?
+
+  // ---- 4. FALLBACK STATE (Atharv's integration boundary — audit trail) ----
+  fallback      FallbackInfo
+
+  // ---- 5. CONSOLIDATED FINAL RESULT (what dashboard reads) ----
+  finalResult   FinalResult
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([finalResult.classification])
+  @@index([finalResult.iogpRule])
+  @@index([finalResult.layerUsed])
+  @@index([siteId])
+  @@index([activityTag])
+  @@index([eventDate])
+}
+
+// ============================================================
+// EMBEDDED TYPES
+// ============================================================
+
+type Layer1Result {
+  attempted        Boolean   @default(true)
+  matched          Boolean               // true if a direct pattern hit
+  matchedKeywords  String[]              // e.g. ["welding", "no gas test"]
+  matchedRuleId    String?               // which pattern-rule fired
+  matchedIogpRules String[]              // e.g. ["Hot Work", "Energy Isolation"]
+  executionTimeMs  Float?
+}
+
+type Layer2Result {
+  invoked             Boolean   @default(true)
+  action              String?               // e.g. "Welding"
+  object              String?               // e.g. "Pipeline"
+  controlDeficiency    String?               // e.g. "no permit present"
+  confidenceScore     Float?                // 0.0–1.0
+  reconstructedHazard String?               // human-readable summary of what Layer 2 inferred
+  executionTimeMs     Float?
+}
+
+type FallbackInfo {
+  layer2Available   Boolean  @default(true)
+  fallbackTriggered Boolean  @default(false)
+  fallbackReason    String?              // "timeout" | "5xx_error" | "network_error" | "not_implemented" | null
+  timeoutMs         Int?                 // configured threshold at time of request
+  loggedAt          DateTime?
+}
+
+type FinalResult {
+  classification    String               // "SIF_Potential" | "Non_SIF_Potential"
+  iogpRule          String?              // Primary rule: "Energy Isolation" | "Hot Work" | "Confined Space" | null
+  layerUsed         String   @default("layer1") // "layer1" | "layer2" | "layer1_fallback"
+  evidenceSource    String               // "layer1" | "layer2"
+  evidenceTrail     String[]             // matched keywords OR parsed slot summary, for explainability modal
+  reviewStatus      String   @default("pending") // "pending" | "reviewed" | "dismissed"
+}
