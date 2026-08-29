@@ -156,3 +156,5 @@ vite.config.ts.timestamp-*
 # OS specific files
 .DS_Store
 Thumbs.db
+
+node_modules/
