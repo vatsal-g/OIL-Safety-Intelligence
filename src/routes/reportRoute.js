@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 const prisma = require("../config/prisma");
 const { runLayer1WithTiming } = require("../layer1/timingWrapper");
 const { runLayer2WithFallback } = require("../layer2/client");
@@ -7,10 +8,22 @@ const redisClient = require("../config/redis"); // Redis client import
 
 const REPORTS_CACHE_KEY = "reports:all";
 
+// ---- Route-Specific Rate Limiter ----
+// Restricts classification requests to 15 requests per minute per IP
+const classifyLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 15, // Limit each IP to 15 classification requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Classification rate limit exceeded. Please wait a minute before submitting more reports."
+  }
+});
+
 /**
  * POST /api/reports/classify
  */
-router.post("/classify", async (req, res) => {
+router.post("/classify", classifyLimiter, async (req, res) => {
   try {
     const { rawText, source, siteId, activityTag, eventDate } = req.body;
 
@@ -73,16 +86,6 @@ router.post("/classify", async (req, res) => {
           reviewStatus: "pending",
         };
       } else {
-        // Layer 2 ran (or attempted to run) but didn't reach the
-        // confidence bar. Previously this discarded Layer 2's
-        // output entirely (evidenceTrail: []), which meant a
-        // reviewer clicking a "Non_SIF_Potential" report had zero
-        // explanation for why — a direct contradiction of the
-        // system's "100% explainable" pitch. Now we keep whatever
-        // Layer 2 actually found (even at low confidence) so the
-        // explainability modal always has something to show,
-        // unless there's truly nothing because the fallback
-        // triggered and Layer 2 never ran at all.
         const lowConfidenceTrail =
           layer2Data && !fallbackData.fallbackTriggered
             ? [
