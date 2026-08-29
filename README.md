@@ -480,7 +480,6 @@ The system is deliberately tuned for **high recall over high precision**. The re
 <div align="center">
 
 ### 🛢️ Built for Smart India Hackathon 2026
-**Oil India Limited**
 
 *Explainable by design. Fast by architecture. Built to catch what monthly reviews miss.*
 
