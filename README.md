@@ -234,28 +234,6 @@ OIL-Safety-Intelligence/
 - A Redis instance (Upstash or self-hosted) — optional, degrades gracefully if absent
 - Python 3.10+ (for the Layer 2 FastAPI service, once available)
 
-## 🔐 Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Server
-PORT=5000
-
-# Database (MongoDB via Prisma)
-DATABASE_URL="mongodb+srv://<user>:<password>@<cluster>/<db>?retryWrites=true&w=majority"
-
-# Redis (Upstash) — optional; system degrades gracefully without it
-REDIS_URL="rediss://<user>:<password>@<upstash-endpoint>:<port>"
-
-# Layer 2 microservice
-LAYER2_URL="http://localhost:8000/predict"
-LAYER2_TIMEOUT_MS=2500
-```
-
-> **Note:** `REDIS_URL` using the `rediss://` scheme automatically enables TLS in `src/config/redis.js`. If `REDIS_URL` is unset entirely, the app runs fine — Redis calls are skipped via `isOpen` checks rather than throwing.
-
----
 
 ## 🗄️ Database — MongoDB + Prisma
 
@@ -496,37 +474,6 @@ The underlying engine is **domain-agnostic** — connecting it to OIL's own repo
 
 ### Class Imbalance Handling
 The system is deliberately tuned for **high recall over high precision**. The reasoning is a direct cost comparison: a false positive costs about two minutes of human review time, while a false negative can cost a life. Given that asymmetry, the system errs on the side of flagging a borderline report for human review rather than silently dismissing it.
-
----
-
-## 👥 Team & Ownership
-
-| Role | Owner(s) | Responsibilities |
-|---|---|---|
-| 🔧 **Core Operations & Integration Lead** | Atharv Verma | Built the Express server end-to-end · MongoDB connectivity (Prisma) · Redis integration & caching layer · API integration · CORS config · Axios error debugging · route verification · Layer1↔Layer2 fallback handling |
-| 🧠 **Backend / ML Team** | Vatsal, Ishaan | DB schemas, Layer 1 pattern libraries, Layer 2 parsing endpoints, ML model training |
-| 🎨 **Frontend Team** | Rahul, Sakshee, Harsh | React UI, Triage Queue views, Analytics dashboard |
-
-Clear ownership boundaries keep the two-layer architecture's integration points — the exact places where things are most likely to break — under active, named responsibility.
-
----
-
-## 🎤 Judge Q&A — Anticipated Questions
-
-**Q1. How do you handle class imbalance (only 20–25% of reports are SIFs)?**
-We tune for high recall over precision — a false positive costs ~2 minutes of review time, a false negative can cost a life.
-
-**Q2. How do you train without ground-truth labeled data from OIL?**
-Public safety datasets (MSHA, NASA ASRS, BSEE, OSHA), filtered for low-severity/high-potential-severity incidents. The engine is domain-agnostic — swapping in OIL's own data later is a config change, not a rebuild.
-
-**Q3. Why not use OpenAI or hosted LLMs?**
-Data privacy (OIL's data never leaves the premises) and auditability (a hosted LLM is an unexplainable black box; our system can always point to the exact evidence behind a flag).
-
-**Q4. How do you prevent worker distrust or alert fatigue?**
-Analysis is scoped to failed controls and activities, never individual worker identities — a systems-safety tool, not a monitoring tool. Flag rate is calibrated to match published industry base rates (~20–25%).
-
-**Q5. What happens if Layer 2 fails during the demo?**
-Watch it happen — the system falls back to Layer 1 automatically, with the fallback event logged (`fallbackReason`, `loggedAt`) for audit. No crash, no unhandled error. This is tested, not theoretical.
 
 ---
 
