@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("../config/prisma");
 const { runLayer1WithTiming } = require("../layer1/timingWrapper");
 const { runLayer2WithFallback } = require("../layer2/client");
 const redisClient = require("../config/redis"); // Redis client import
 
-const prisma = new PrismaClient();
 const REPORTS_CACHE_KEY = "reports:all";
 
 /**
@@ -74,12 +73,34 @@ router.post("/classify", async (req, res) => {
           reviewStatus: "pending",
         };
       } else {
+        // Layer 2 ran (or attempted to run) but didn't reach the
+        // confidence bar. Previously this discarded Layer 2's
+        // output entirely (evidenceTrail: []), which meant a
+        // reviewer clicking a "Non_SIF_Potential" report had zero
+        // explanation for why — a direct contradiction of the
+        // system's "100% explainable" pitch. Now we keep whatever
+        // Layer 2 actually found (even at low confidence) so the
+        // explainability modal always has something to show,
+        // unless there's truly nothing because the fallback
+        // triggered and Layer 2 never ran at all.
+        const lowConfidenceTrail =
+          layer2Data && !fallbackData.fallbackTriggered
+            ? [
+                `Action: ${layer2Data.action || "N/A"}`,
+                `Object: ${layer2Data.object || "N/A"}`,
+                `Deficiency: ${layer2Data.controlDeficiency || "N/A"}`,
+                `Confidence: ${
+                  layer2Data.confidenceScore !== null ? layer2Data.confidenceScore : "N/A"
+                } (below 0.70 threshold)`,
+              ]
+            : [];
+
         finalResultData = {
           classification: "Non_SIF_Potential",
           iogpRule: null,
           layerUsed: fallbackData.fallbackTriggered ? "layer1_fallback" : "layer2",
           evidenceSource: fallbackData.fallbackTriggered ? "layer1" : "layer2",
-          evidenceTrail: [],
+          evidenceTrail: lowConfidenceTrail,
           reviewStatus: "pending",
         };
       }
