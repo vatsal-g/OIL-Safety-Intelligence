@@ -101,10 +101,12 @@ router.post("/classify", async (req, res) => {
     });
 
     // Invalidate Redis cache so the GET endpoint returns updated data
-    try {
-      await redisClient.del(REPORTS_CACHE_KEY);
-    } catch (cacheErr) {
-      console.error("Redis Cache Invalidation Error:", cacheErr);
+    if (redisClient.isOpen) {
+      try {
+        await redisClient.del(REPORTS_CACHE_KEY);
+      } catch (cacheErr) {
+        console.error("Redis Cache Invalidation Error:", cacheErr);
+      }
     }
 
     return res.status(200).json(savedReport);
