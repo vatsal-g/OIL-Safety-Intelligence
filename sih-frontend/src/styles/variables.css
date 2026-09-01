@@ -1,0 +1,28 @@
+:root {
+  --navy-950: #0b111f;
+  --navy-900: #0f172a;
+  --navy-800: #16213a;
+  --navy-700: #202b47;
+
+  --paper: #fafaf8;
+  --paper-raised: #ffffff;
+
+  --line: #e4e4e1;
+  --line-soft: #ededeb;
+
+  --ink: #191a1e;
+  --ink-soft: #5b5e68;
+  --ink-faint: #9497a1;
+
+  --red: #b3261e;
+  --red-bg: #fbeae9;
+
+  --amber: #9a5b0a;
+  --amber-bg: #fbf1df;
+
+  --green: #1e6b3d;
+  --green-bg: #e9f5ee;
+
+  --blue: #1d4e9b;
+  --blue-bg: #eaf0fb;
+}

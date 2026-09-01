@@ -1,0 +1,16 @@
+{
+  "action": "drilling_wellwork",
+  "action_confidence": 0.158,
+  "object": "well_casing",
+  "object_confidence": 0.181,
+  "control_deficiencies": [],
+  "sif_probability": 0.8,
+  "sif_class": "SIF_POTENTIAL",
+  "iogp_rules": [
+    "Line of Fire"
+  ],
+  "evidence": [
+    "without pressure regulator"
+  ],
+  "model_note": "SIF score is weak-supervision prototype; validate/retrain on human SIF annotations before deployment."
+}

@@ -1,0 +1,49 @@
+import os,re,json,joblib,pandas as pd,numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import ComplementNB
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report,precision_recall_fscore_support
+BASE=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CSV='/mnt/data/ITA_Case_Detail_Data_2025_through_3-15-2026 (1).csv'
+COLS=['ID','incident_outcome','job_description','industry_description','New_incident_location','New_incident_description','New_nar_before_incident','New_nar_what_happened','New_nar_injury_illness','New_nar_object_substance']
+A={'pressure_testing':['pressure test','pressure testing','pressuriz','hydrotest','hydro test','pneumatic test'],'hot_work':['weld','torch','grind','braz','hot work'],'confined_space':['confined space','tank entry','vessel entry','manhole'],'working_at_height':['ladder','scaffold','roof','fall from','working at height'],'lifting':['crane','hoist','rigging','lifting','suspended load','forklift'],'electrical_work':['electrical','energized','voltage','breaker','switchgear','arc flash'],'line_breaking':['line break','breaking containment','open line','flange','opening valve'],'excavation':['excavat','trench','digging'],'driving':['driving','motor vehicle','seat belt','road','truck','car'],'chemical_handling':['chemical','solvent','acid','caustic','chlorine','ammonia'],'drilling_wellwork':['drilling','well work','wellhead','casing','tubing','well'],'maintenance_repair':['maintenance','repair','servic','replace','fixing','troubleshoot'],'material_handling':['material handling','stacking','pallet','move material'],'cleaning':['cleaning','wash','sweep','mop'],'inspection_testing':['inspect','inspection','testing','gauge','measurement'],'construction_installation':['construction','install','installation','assembly','demolition'],'manual_tools':['hand tool','power tool','saw','hammer','wrench','grinder','drill']}
+O={'pipeline':['pipeline','pipe line'],'well_casing':['well casing','casing','wellhead','tubing','annulus','well #','well '],'pressure_vessel':['pressure vessel','vessel','boiler'],'tank':['tank','storage tank'],'valve':['valve','ssv','scssv'],'pump':['pump','pumping'],'rotating_equipment':['compressor','motor','rotating equipment','fan'],'electrical_panel':['electrical panel','switchgear','breaker','control panel'],'electrical_cable':['cable','wire','conduit'],'crane_lifting_equipment':['crane','hoist','rigging'],'vehicle':['vehicle','truck','car','forklift','motor vehicle'],'confined_space':['confined space','manhole'],'scaffold':['scaffold','scaffolding'],'ladder':['ladder'],'chemical':['chemical','acid','solvent','caustic','ammonia','chlorine'],'gas_hydrocarbon':['gas','natural gas','hydrocarbon','steam'],'hand_tool':['hammer','wrench','saw','grinder','drill','hand tool'],'machinery':['machine','machinery','equipment']}
+C={'no_isolation':['no isolation','not isolated','without isolation','isolation not','failed to isolate','lockout','lock out','loto'],'no_permit':['no permit','without permit','permit not','permit missing'],'no_gas_test':['no gas test','gas test not','without gas test'],'missing_pressure_control':['without a pressure regulator','without a pressure safety valve','no pressure regulator','no pressure safety valve','missing pressure regulator','missing pressure safety valve'],'barrier_bypassed':['bypass','bypassed','disabled safety','override','overridden'],'jsa_missing':['no jsa','without jsa','jsa not','jsa missing','jsa incomplete'],'no_hazard_analysis':['no hazard analysis','hazard analysis not','inadequate hazard analysis'],'moc_missing':['no moc','moc not','management of change not','without management of change'],'procedure_missing':['no procedure','procedure not available','without procedure','no work instruction'],'procedure_not_followed':['failed to follow procedure','did not follow procedure','procedure not followed','workaround'],'guarding_missing':['no guard','guard missing','unguarded','guarding removed'],'ppe_missing':['no ppe','without ppe','no helmet','without helmet','no hardhat','without gloves'],'supervision_inadequate':['no supervision','inadequate supervision','lack of supervision','unsupervised'],'wrong_rating':['wrong rating','undersized','exceeded rating','rating exceeded'],'barrier_failed':['failed barrier','barrier failure','loss of containment','containment failed'],'communication_failure':['poor communication','communication failure','not communicated','miscommunicated'],'exclusion_zone_missing':['no barricade','no exclusion zone','without barricade','barrier not established'],'unknown_stored_energy':['unverified','not verified','residual pressure','stored energy','unknown pressure']}
+def rx(xs): return '(?:'+'|'.join(re.escape(x) for x in xs)+')'
+def main():
+    df=pd.read_csv(CSV,usecols=COLS,nrows=8000,low_memory=False)
+    df['text']=df[COLS[2:]].fillna('').astype(str).agg(' '.join,axis=1).str.lower().str.replace(r'\s+',' ',regex=True).str.strip()
+    AM=pd.DataFrame({k:df.text.str.contains(rx(v),regex=True,na=False) for k,v in A.items()}); OM=pd.DataFrame({k:df.text.str.contains(rx(v),regex=True,na=False) for k,v in O.items()}); CM=pd.DataFrame({k:df.text.str.contains(rx(v),regex=True,na=False) for k,v in C.items()})
+    df['action_label']=AM.idxmax(axis=1).where(AM.sum(1)==1); df['object_label']=OM.idxmax(axis=1).where(OM.sum(1)==1)
+    risky=AM[['pressure_testing','hot_work','confined_space','working_at_height','lifting','electrical_work','line_breaking','excavation','driving','drilling_wellwork']].any(axis=1)
+    df['sif_weak']=((risky & CM.any(axis=1)) | df.incident_outcome.astype(str).isin(['1','1.0'])).astype(int)
+    # candidate human-review set
+    review=df.loc[df.sif_weak.eq(1),COLS+['text']].sample(n=min(1000,int(df.sif_weak.sum())),random_state=42)
+    for c in ['human_sif_label','human_action','human_object','human_control_deficiency','human_iogp_rule']: review[c]=''
+    review.to_csv(BASE+'/data/annotation_review_1000.csv',index=False)
+    vec=TfidfVectorizer(ngram_range=(1,1),min_df=1,max_features=8000,sublinear_tf=True,strip_accents='unicode')
+    X=vec.fit_transform(df.text); joblib.dump(vec,BASE+'/models/tfidf_vectorizer.joblib')
+    metrics={}
+    for name,target in [('action',df.action_label),('object',df.object_label)]:
+        keep=target.notna().to_numpy(); y=target.loc[keep].to_numpy(); Xk=X[keep]
+        counts=pd.Series(y).value_counts()
+        keep2=np.isin(y,counts[counts>=3].index)
+        y=y[keep2]; Xk=Xk[keep2]
+        if len(np.unique(y))>=2:
+            xt,xv,yt,yv=train_test_split(Xk,y,test_size=.2,random_state=42,stratify=y)
+            clf=ComplementNB(alpha=.05); clf.fit(xt,yt); pr=clf.predict(xv); joblib.dump(clf,BASE+'/models/'+name+'_model.joblib'); metrics[name]=classification_report(yv,pr,output_dict=True,zero_division=0)
+        else:
+            metrics[name]={'note':'insufficient weak-label coverage in small prototype sample'}
+    xt,xv,yt,yv=train_test_split(X,df.sif_weak.to_numpy(),test_size=.2,random_state=42,stratify=df.sif_weak)
+    sc=ComplementNB(alpha=.05); sc.fit(xt,yt); pr=sc.predict(xv); joblib.dump(sc,BASE+'/models/sif_model_weak.joblib'); metrics['sif_weak']=classification_report(yv,pr,output_dict=True,zero_division=0)
+    controls={}; control_scores=[]
+    for j,label in enumerate(CM.columns):
+        y=CM.iloc[:,j].astype(int).to_numpy()
+        if y.sum()<3 or y.sum()==len(y): continue
+        xt,xv,yt,yv=train_test_split(X,y,test_size=.2,random_state=42,stratify=y)
+        m=ComplementNB(alpha=.05); m.fit(xt,yt); controls[label]=m
+        pr=m.predict(xv); control_scores.append(precision_recall_fscore_support(yv,pr,average='binary',zero_division=0)[2])
+    joblib.dump(controls,BASE+'/models/control_models.joblib'); metrics['control_macro_f1']=float(np.mean(control_scores)) if control_scores else 0.0
+    json.dump({'sample_rows':len(df),'weak_sif_rate':float(df.sif_weak.mean()),'action_training_rows':int(df.action_label.notna().sum()),'object_training_rows':int(df.object_label.notna().sum()),'metrics':metrics},open(BASE+'/docs/training_metrics_weak.json','w'),indent=2)
+if __name__=='__main__': main()
