@@ -1,0 +1,120 @@
+{
+  "trained_at": "2026-08-29T01:44:00",
+  "sklearn_version": "1.9.0",
+  "python_version": "3.14.6",
+  "feature_matrix": [
+    4879,
+    74719
+  ],
+  "human_train_rows": 35,
+  "weak_rows": 4844,
+  "action": {
+    "training_rows": 3284,
+    "classes": [
+      "chemical_handling",
+      "cleaning",
+      "confined_space",
+      "construction_installation",
+      "drilling_wellwork",
+      "driving",
+      "electrical_work",
+      "excavation",
+      "hot_work",
+      "inspection_testing",
+      "lifting",
+      "line_breaking",
+      "maintenance_repair",
+      "manual_tools",
+      "material_handling",
+      "working_at_height"
+    ],
+    "dropped_rare_classes": [
+      "pressure_testing"
+    ]
+  },
+  "object": {
+    "training_rows": 3293,
+    "classes": [
+      "chemical",
+      "confined_space",
+      "crane_lifting_equipment",
+      "electrical_cable",
+      "electrical_panel",
+      "gas_hydrocarbon",
+      "hand_tool",
+      "ladder",
+      "machinery",
+      "pipeline",
+      "pressure_vessel",
+      "pump",
+      "rotating_equipment",
+      "scaffold",
+      "tank",
+      "valve",
+      "vehicle",
+      "well_casing"
+    ],
+    "dropped_rare_classes": []
+  },
+  "controls": {
+    "no_isolation": {
+      "weak_positives": 129
+    },
+    "no_permit": {
+      "skipped": "only 1 weak positives (< 25)"
+    },
+    "no_gas_test": {
+      "skipped": "only 4 weak positives (< 25)"
+    },
+    "missing_pressure_control": {
+      "skipped": "only 5 weak positives (< 25)"
+    },
+    "barrier_bypassed": {
+      "skipped": "only 19 weak positives (< 25)"
+    },
+    "jsa_missing": {
+      "skipped": "only 0 weak positives (< 25)"
+    },
+    "no_hazard_analysis": {
+      "skipped": "only 0 weak positives (< 25)"
+    },
+    "moc_missing": {
+      "skipped": "only 4 weak positives (< 25)"
+    },
+    "procedure_missing": {
+      "skipped": "only 0 weak positives (< 25)"
+    },
+    "procedure_not_followed": {
+      "skipped": "only 3 weak positives (< 25)"
+    },
+    "guarding_missing": {
+      "weak_positives": 253
+    },
+    "ppe_missing": {
+      "weak_positives": 111
+    },
+    "supervision_inadequate": {
+      "weak_positives": 69
+    },
+    "wrong_rating": {
+      "skipped": "only 5 weak positives (< 25)"
+    },
+    "barrier_failed": {
+      "weak_positives": 298
+    },
+    "communication_failure": {
+      "skipped": "only 14 weak positives (< 25)"
+    },
+    "exclusion_zone_missing": {
+      "skipped": "only 1 weak positives (< 25)"
+    },
+    "unknown_stored_energy": {
+      "skipped": "only 10 weak positives (< 25)"
+    }
+  },
+  "sif": {
+    "training_rows": 3915,
+    "positive_rate": 0.8909,
+    "excluded_uncertain_rows": 964
+  }
+}

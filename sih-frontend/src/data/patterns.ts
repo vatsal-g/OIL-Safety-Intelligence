@@ -1,0 +1,105 @@
+import type { Pattern } from "@/types/pattern";
+
+export const PATTERNS: Pattern[] = [
+  {
+    id: "p1",
+    chain: ["Maintenance", "Energy Isolation", "LOTO Verification Gap"],
+    reports: 43,
+    sites: 7,
+    trend: "up",
+    trendPct: 18,
+    topSite: "Digboi",
+    sitesBd: [
+      ["Digboi", 37],
+      ["Baghjan", 29],
+      ["Duliajan", 18],
+      ["Moran", 11],
+      ["Dibrugarh", 5],
+    ],
+    activitiesBd: [
+      ["Maintenance", 62],
+      ["Shutdown", 21],
+      ["Inspection", 17],
+    ],
+    barriersBd: [
+      ["LOTO verification", 48],
+      ["Permit verification", 27],
+      ["Isolation identification", 15],
+      ["Sign-off missing", 10],
+    ],
+  },
+  {
+    id: "p2",
+    chain: ["Confined Space", "Gas Testing Gap"],
+    reports: 31,
+    sites: 4,
+    trend: "up",
+    trendPct: 11,
+    topSite: "Baghjan",
+    sitesBd: [
+      ["Baghjan", 41],
+      ["Digboi", 34],
+      ["Moran", 15],
+      ["Duliajan", 10],
+    ],
+    activitiesBd: [
+      ["Maintenance", 57],
+      ["Inspection", 29],
+      ["Shutdown", 14],
+    ],
+    barriersBd: [
+      ["Gas testing not confirmed", 52],
+      ["Permit not verified", 31],
+      ["Rescue plan absent", 17],
+    ],
+  },
+  {
+    id: "p3",
+    chain: ["Hot Work", "Permit / Ignition Control"],
+    reports: 27,
+    sites: 5,
+    trend: "flat",
+    trendPct: 0,
+    topSite: "Moran",
+    sitesBd: [
+      ["Moran", 33],
+      ["Duliajan", 29],
+      ["Digboi", 19],
+      ["Baghjan", 12],
+      ["Dibrugarh", 7],
+    ],
+    activitiesBd: [
+      ["Maintenance", 48],
+      ["Shutdown", 33],
+      ["Operations", 19],
+    ],
+    barriersBd: [
+      ["Fire watch gap", 39],
+      ["Permit not verified", 34],
+      ["Gas testing skipped", 27],
+    ],
+  },
+  {
+    id: "p4",
+    chain: ["Contractor Work", "Line of Fire", "Barricading Gap"],
+    reports: 22,
+    sites: 3,
+    trend: "up",
+    trendPct: 24,
+    topSite: "Dibrugarh",
+    sitesBd: [
+      ["Dibrugarh", 46],
+      ["Duliajan", 32],
+      ["Baghjan", 22],
+    ],
+    activitiesBd: [
+      ["Contractor Work", 71],
+      ["Operations", 29],
+    ],
+    barriersBd: [
+      ["Barricading not established", 44],
+      ["Exclusion zone breach", 33],
+      ["Signage missing", 23],
+    ],
+  },
+];

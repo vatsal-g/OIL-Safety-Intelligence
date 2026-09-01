@@ -1,3 +1,8 @@
-node_modules/
-
+﻿node_modules/
 .env
+.env.*
+*.log
+
+# Large local datasets
+**/January2015toNovember2025.csv
+sih-layer2/datasets_complete_source_bundle.zip

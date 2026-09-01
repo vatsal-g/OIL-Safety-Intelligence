@@ -1,0 +1,153 @@
+{
+  "report_id": "cli-001",
+  "text_prepared": "worker was pressurizing a well casing using temporary equipment without a pressure regulator or pressure safety valve.",
+  "action": {
+    "label": "pressure_testing",
+    "confidence": 0.93,
+    "evidence": [
+      "pressurizing"
+    ],
+    "source": "rule",
+    "alternatives": []
+  },
+  "object": {
+    "label": "well_casing",
+    "confidence": 0.99,
+    "evidence": [
+      "well casing",
+      "casing"
+    ],
+    "source": "rule",
+    "alternatives": [
+      {
+        "label": "valve",
+        "confidence": 0.873
+      },
+      {
+        "label": "machinery",
+        "confidence": 0.33
+      }
+    ]
+  },
+  "control_deficiencies": [
+    {
+      "label": "missing_pressure_control",
+      "confidence": 0.844,
+      "severity": 0.9,
+      "evidence": [
+        "without a pressure regulator",
+        "without a pressure regulator or pressure safety valve"
+      ],
+      "spans": [
+        [
+          64,
+          92
+        ],
+        [
+          64,
+          117
+        ]
+      ],
+      "source": "evidence"
+    }
+  ],
+  "uncertain_control_candidates": [
+    {
+      "label": "no_isolation",
+      "model_probability": 1.0,
+      "status": "uncertain_no_textual_evidence",
+      "evidence": []
+    },
+    {
+      "label": "barrier_failed",
+      "model_probability": 1.0,
+      "status": "uncertain_no_textual_evidence",
+      "evidence": []
+    },
+    {
+      "label": "unknown_stored_energy",
+      "model_probability": 1.0,
+      "status": "uncertain_no_textual_evidence",
+      "evidence": []
+    }
+  ],
+  "sif": {
+    "score": 0.84,
+    "classification": "SIF_POTENTIAL",
+    "abstained": false,
+    "note": "",
+    "components": {
+      "energy": 0.9,
+      "control_gap": 0.844,
+      "consequence": 0.0,
+      "model_prior": 0.0
+    },
+    "reasons": [
+      {
+        "factor": "hazardous_energy",
+        "detail": "pressure",
+        "contribution": 0.45,
+        "evidence": [
+          "pressurizing"
+        ]
+      },
+      {
+        "factor": "control_deficiency",
+        "detail": "missing_pressure_control",
+        "contribution": 0.27,
+        "evidence": [
+          "without a pressure regulator",
+          "without a pressure regulator or pressure safety valve"
+        ]
+      },
+      {
+        "factor": "weak_supervision_model_prior",
+        "detail": "TF-IDF classifier trained on weak labels",
+        "contribution": 0.0,
+        "evidence": []
+      },
+      {
+        "factor": "precursor_pattern",
+        "detail": "high hazardous energy combined with a failed/absent barrier",
+        "contribution": 0.12,
+        "evidence": []
+      }
+    ]
+  },
+  "iogp_rules": [
+    "Line of Fire"
+  ],
+  "iogp_rule_details": [
+    {
+      "rule": "Line of Fire",
+      "confidence": 0.78,
+      "reason": "stored/released energy with a person in the path",
+      "evidence": [
+        "pressurizing"
+      ]
+    }
+  ],
+  "hazardous_energies": [
+    {
+      "label": "pressure",
+      "severity": 0.9,
+      "evidence": [
+        "pressurizing"
+      ]
+    }
+  ],
+  "evidence": [
+    "without a pressure regulator",
+    "without a pressure regulator or pressure safety valve",
+    "pressurizing",
+    "well casing",
+    "casing"
+  ],
+  "meta": {
+    "token_count": 17,
+    "models_available": true,
+    "model_problems": [],
+    "layer1_context": {},
+    "note": "Layer 2 output is evidence-gated and NOT validated for production safety decisions. Control deficiencies are only asserted when supporting text is present; SIF potential is an explainable risk score, not a certified SIF classification. See docs/MODEL_CARD.md."
+  }
+}
