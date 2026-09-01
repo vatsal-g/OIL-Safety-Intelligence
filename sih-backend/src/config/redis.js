@@ -4,6 +4,7 @@ const isSecure = process.env.REDIS_URL && process.env.REDIS_URL.startsWith("redi
 
 const redisClient = createClient({
   url: process.env.REDIS_URL,
+<<<<<<< HEAD
   socket: {
     keepAlive: 10000, // Send TCP keep-alive packets every 10 seconds to avoid ECONNRESET
     reconnectStrategy: (retries) => {
@@ -24,23 +25,42 @@ redisClient.on("error", (err) => {
   } else {
     console.error("❌ Upstash Redis Error:", err.message || err);
   }
+=======
+  ...(isSecure && {
+    socket: {
+      tls: true,
+      rejectUnauthorized: false,
+    },
+  }),
+});
+
+redisClient.on("error", (err) => {
+  console.error("❌ Upstash Redis Error:", err.message || err);
+>>>>>>> origin/main
 });
 
 redisClient.on("connect", () => {
   console.log("⚡ Connected to Upstash Redis Cache!");
 });
 
+<<<<<<< HEAD
 redisClient.on("reconnecting", () => {
   console.log("🔄 Reconnecting to Upstash Redis...");
 });
 
+=======
+>>>>>>> origin/main
 (async () => {
   try {
     if (process.env.REDIS_URL) {
       await redisClient.connect();
     }
   } catch (err) {
+<<<<<<< HEAD
     console.error("❌ Upstash Redis Initial Connection Failed:", err.message);
+=======
+    console.error("❌ Connection Failed:", err.message);
+>>>>>>> origin/main
   }
 })();
 

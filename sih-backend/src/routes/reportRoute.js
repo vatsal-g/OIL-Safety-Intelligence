@@ -4,6 +4,7 @@ const rateLimit = require("express-rate-limit");
 const prisma = require("../config/prisma");
 const { runLayer1WithTiming } = require("../layer1/timingWrapper");
 const { runLayer2WithFallback } = require("../layer2/client");
+<<<<<<< HEAD
 const redisClient = require("../config/redis");
 
 const REPORTS_CACHE_KEY = "reports:all";
@@ -12,6 +13,17 @@ const REPORTS_CACHE_KEY = "reports:all";
 const classifyLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 1000, // Increased to allow bulk ingestion without 429 errors
+=======
+const redisClient = require("../config/redis"); // Redis client import
+
+const REPORTS_CACHE_KEY = "reports:all";
+
+// ---- Route-Specific Rate Limiter ----
+// Restricts classification requests to 15 requests per minute per IP
+const classifyLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 15, // Limit each IP to 15 classification requests per minute
+>>>>>>> origin/main
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -20,6 +32,7 @@ const classifyLimiter = rateLimit({
 });
 
 /**
+<<<<<<< HEAD
  * Helper to safely clear Redis cache
  */
 async function clearReportsCache() {
@@ -33,6 +46,8 @@ async function clearReportsCache() {
 }
 
 /**
+=======
+>>>>>>> origin/main
  * POST /api/reports/classify
  */
 router.post("/classify", classifyLimiter, async (req, res) => {
@@ -43,16 +58,27 @@ router.post("/classify", classifyLimiter, async (req, res) => {
       return res.status(400).json({ error: "rawText is required and must be a non-empty string." });
     }
 
+<<<<<<< HEAD
     // 1. Run Layer 1 Matcher
+=======
+    // 1. Run Layer 1 Regex Matcher
+>>>>>>> origin/main
     const layer1Result = runLayer1WithTiming(rawText);
 
     const layer1Data = {
       attempted: true,
       matched: layer1Result.matched,
+<<<<<<< HEAD
       matchedKeywords: layer1Result.matchedKeywords || [],
       matchedRuleId: layer1Result.matchedRuleId || null,
       matchedIogpRules: layer1Result.matchedIogpRules || [],
       executionTimeMs: layer1Result.executionTimeMs || 0,
+=======
+      matchedKeywords: layer1Result.matchedKeywords,
+      matchedRuleId: layer1Result.matchedRuleId,
+      matchedIogpRules: layer1Result.matchedIogpRules || [],
+      executionTimeMs: layer1Result.executionTimeMs,
+>>>>>>> origin/main
     };
 
     let layer2Data = null;
@@ -70,10 +96,17 @@ router.post("/classify", classifyLimiter, async (req, res) => {
     if (layer1Result.matched) {
       finalResultData = {
         classification: "SIF_Potential",
+<<<<<<< HEAD
         iogpRule: layer1Result.matchedIogpRules[0] || "General Safety",
         layerUsed: "layer1",
         evidenceSource: "layer1",
         evidenceTrail: layer1Result.matchedKeywords || [],
+=======
+        iogpRule: layer1Result.matchedIogpRules[0] || null,
+        layerUsed: "layer1",
+        evidenceSource: "layer1",
+        evidenceTrail: layer1Result.matchedKeywords,
+>>>>>>> origin/main
         reviewStatus: "pending",
       };
     } 
@@ -81,6 +114,7 @@ router.post("/classify", classifyLimiter, async (req, res) => {
     else {
       const l2Execution = await runLayer2WithFallback(rawText);
       layer2Data = l2Execution.result;
+<<<<<<< HEAD
       fallbackData = l2Execution.fallback || fallbackData;
 
       if (layer2Data) {
@@ -105,16 +139,52 @@ router.post("/classify", classifyLimiter, async (req, res) => {
             `Object: ${objectStr || "Unspecified"}`,
             `Deficiency: ${deficiencyStr || "General hazard"}`,
             `Confidence Score: ${confidence}`,
+=======
+      fallbackData = l2Execution.fallback;
+
+      // High confidence classification from ML model
+      if (layer2Data && layer2Data.confidenceScore !== null && layer2Data.confidenceScore >= 0.70) {
+        finalResultData = {
+          classification: "SIF_Potential",
+          iogpRule: null,
+          layerUsed: "layer2",
+          evidenceSource: "layer2",
+          evidenceTrail: [
+            `Action: ${layer2Data.action || "N/A"}`,
+            `Object: ${layer2Data.object || "N/A"}`,
+            `Deficiency: ${layer2Data.controlDeficiency || "N/A"}`,
+>>>>>>> origin/main
           ],
           reviewStatus: "pending",
         };
       } else {
+<<<<<<< HEAD
         finalResultData = {
           classification: "Non_SIF_Potential",
           iogpRule: "General Safety",
           layerUsed: "layer1_fallback",
           evidenceSource: "layer1",
           evidenceTrail: ["Layer 2 service unavailable; evaluated by fallback handler."],
+=======
+        const lowConfidenceTrail =
+          layer2Data && !fallbackData.fallbackTriggered
+            ? [
+                `Action: ${layer2Data.action || "N/A"}`,
+                `Object: ${layer2Data.object || "N/A"}`,
+                `Deficiency: ${layer2Data.controlDeficiency || "N/A"}`,
+                `Confidence: ${
+                  layer2Data.confidenceScore !== null ? layer2Data.confidenceScore : "N/A"
+                } (below 0.70 threshold)`,
+              ]
+            : [];
+
+        finalResultData = {
+          classification: "Non_SIF_Potential",
+          iogpRule: null,
+          layerUsed: fallbackData.fallbackTriggered ? "layer1_fallback" : "layer2",
+          evidenceSource: fallbackData.fallbackTriggered ? "layer1" : "layer2",
+          evidenceTrail: lowConfidenceTrail,
+>>>>>>> origin/main
           reviewStatus: "pending",
         };
       }
@@ -129,6 +199,7 @@ router.post("/classify", classifyLimiter, async (req, res) => {
         activityTag: activityTag || null,
         eventDate: eventDate ? new Date(eventDate) : null,
         layer1: layer1Data,
+<<<<<<< HEAD
         layer2: layer2Data ? {
           invoked: layer2Data.invoked ?? true,
           action: layer2Data.action || null,
@@ -138,13 +209,27 @@ router.post("/classify", classifyLimiter, async (req, res) => {
           reconstructedHazard: layer2Data.reconstructedHazard || null,
           executionTimeMs: layer2Data.executionTimeMs ?? null,
         } : undefined,
+=======
+        layer2: layer2Data,
+>>>>>>> origin/main
         fallback: fallbackData,
         finalResult: finalResultData,
       },
     });
 
+<<<<<<< HEAD
     // Invalidate Redis cache so dashboard updates immediately
     await clearReportsCache();
+=======
+    // Invalidate Redis cache so the GET endpoint returns updated data
+    if (redisClient.isOpen) {
+      try {
+        await redisClient.del(REPORTS_CACHE_KEY);
+      } catch (cacheErr) {
+        console.error("Redis Cache Invalidation Error:", cacheErr);
+      }
+    }
+>>>>>>> origin/main
 
     return res.status(200).json(savedReport);
   } catch (error) {
@@ -153,6 +238,7 @@ router.post("/classify", classifyLimiter, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // GET /api/reports - Fetch all reports (No hardcoded limit, returns total complete set)
 router.get("/", async (req, res) => {
   try {
@@ -197,12 +283,38 @@ router.get("/", async (req, res) => {
       console.error("MongoDB/Prisma connection error:", dbErr.message);
       return res.status(200).json([]);
     }
+=======
+// GET /api/reports - Fetch all reports for Frontend Dashboard (Cached via Redis)
+router.get("/", async (req, res) => {
+  try {
+    // 1. Check Redis Cache
+    if (redisClient.isOpen) {
+      const cachedReports = await redisClient.get(REPORTS_CACHE_KEY);
+      if (cachedReports) {
+        return res.status(200).json(JSON.parse(cachedReports));
+      }
+    }
+
+    // 2. Cache Miss -> Query MongoDB via Prisma
+    const reports = await prisma.report.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    // 3. Store in Redis for 5 minutes (300 seconds)
+    if (redisClient.isOpen) {
+      await redisClient.setEx(REPORTS_CACHE_KEY, 300, JSON.stringify(reports));
+    }
+
+    return res.status(200).json(reports);
+>>>>>>> origin/main
   } catch (error) {
     console.error("Error fetching reports:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+<<<<<<< HEAD
 /**
  * GET /api/reports/:id - Fetch single report detail by ID
  */
@@ -263,4 +375,6 @@ router.patch("/:id/status", async (req, res) => {
   }
 });
 
+=======
+>>>>>>> origin/main
 module.exports = router;
