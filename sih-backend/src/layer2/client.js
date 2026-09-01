@@ -1,56 +1,31 @@
 const axios = require("axios");
 
-<<<<<<< HEAD
+const LAYER2_URL =
+  process.env.LAYER2_URL || "http://localhost:8000/analyze";
+
+const LAYER2_TIMEOUT_MS = parseInt(
+  process.env.LAYER2_TIMEOUT_MS || "2500",
+  10
+);
+
+/**
+ * Calls the Python Layer 2 FastAPI /analyze endpoint.
+ * Falls back gracefully when Layer 2 is unavailable.
+ *
+ * @param {string} rawText
+ * @returns {Promise<{result: Object, fallback: Object}>}
+ */
 async function runLayer2WithFallback(rawText) {
-  const timeoutMs = parseInt(process.env.LAYER2_TIMEOUT_MS || "2500", 10);
-  const layer2Url = process.env.LAYER2_URL || "http://localhost:5001/analyze";
+  const startTime = Date.now();
+  const loggedAt = new Date();
 
   const fallbackData = {
     layer2Available: false,
     fallbackTriggered: true,
     fallbackReason: null,
-    timeoutMs,
-    loggedAt: new Date(),
+    timeoutMs: LAYER2_TIMEOUT_MS,
+    loggedAt,
   };
-
-  try {
-    const response = await axios.post(
-      layer2Url,
-      { reportText: rawText },
-      { timeout: timeoutMs }
-    );
-
-    return {
-      result: response.data,
-      fallback: {
-        ...fallbackData,
-        layer2Available: true,
-        fallbackTriggered: false,
-      },
-    };
-  } catch (error) {
-    fallbackData.fallbackReason = error.code === "ECONNABORTED" ? "Timeout" : error.message;
-    
-    return {
-      result: {
-        action: "Unknown",
-        object: "Unknown",
-        controlDeficiency: "Fallback mode active",
-        confidenceScore: 0.0,
-      },
-      fallback: fallbackData,
-=======
-const LAYER2_URL = process.env.LAYER2_URL || "http://localhost:8000/predict";
-const LAYER2_TIMEOUT_MS = parseInt(process.env.LAYER2_TIMEOUT_MS || "2500", 10);
-
-/**
- * Calls Python FastAPI microservice with configurable timeout and error handling.
- * @param {string} rawText
- * @returns {Promise<{result: Object|null, fallback: Object}>}
- */
-async function runLayer2WithFallback(rawText) {
-  const startTime = Date.now();
-  const loggedAt = new Date();
 
   try {
     const response = await axios.post(
@@ -68,36 +43,50 @@ async function runLayer2WithFallback(rawText) {
         action: data.action || null,
         object: data.object || null,
         controlDeficiency: data.controlDeficiency || null,
-        confidenceScore: typeof data.confidenceScore === "number" ? data.confidenceScore : null,
+        confidenceScore:
+          typeof data.confidenceScore === "number"
+            ? data.confidenceScore
+            : null,
         reconstructedHazard: data.reconstructedHazard || null,
         executionTimeMs,
       },
       fallback: {
+        ...fallbackData,
         layer2Available: true,
         fallbackTriggered: false,
         fallbackReason: null,
-        timeoutMs: LAYER2_TIMEOUT_MS,
-        loggedAt,
       },
     };
   } catch (error) {
     let fallbackReason = "5xx_error";
-    if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
+
+    if (
+      error.code === "ECONNABORTED" ||
+      error.message?.toLowerCase().includes("timeout")
+    ) {
       fallbackReason = "timeout";
-    } else if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+    } else if (
+      error.code === "ECONNREFUSED" ||
+      error.code === "ENOTFOUND"
+    ) {
       fallbackReason = "network_error";
+    } else if (error.response?.status >= 500) {
+      fallbackReason = "5xx_error";
     }
 
+    fallbackData.fallbackReason = fallbackReason;
+
     return {
-      result: null,
-      fallback: {
-        layer2Available: false,
-        fallbackTriggered: true,
-        fallbackReason,
-        timeoutMs: LAYER2_TIMEOUT_MS,
-        loggedAt,
+      result: {
+        invoked: false,
+        action: "Unknown",
+        object: "Unknown",
+        controlDeficiency: "Fallback mode active",
+        confidenceScore: 0,
+        reconstructedHazard: null,
+        executionTimeMs: Date.now() - startTime,
       },
->>>>>>> origin/main
+      fallback: fallbackData,
     };
   }
 }
