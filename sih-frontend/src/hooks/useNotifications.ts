@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState,useContext } from "react";
 import { ShellContext } from "@/app/providers";
 import type { Notification } from "@/types/common";
 

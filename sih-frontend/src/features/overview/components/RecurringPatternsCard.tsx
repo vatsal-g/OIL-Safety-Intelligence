@@ -9,7 +9,7 @@ interface RecurringPatternsCardProps {
   loading?: boolean;
 }
 
-export function RecurringPatternsCard({ reports = [], loading = false }: RecurringPatternsCardProps) {
+export function RecurringPatternsCard({loading = false }: RecurringPatternsCardProps) {
   const { openPattern } = useNavigation();
   const navigate = useNavigate();
 
