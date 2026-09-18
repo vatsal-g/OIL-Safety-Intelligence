@@ -1,0 +1,89 @@
+{
+  "trained_at": "2026-08-29T01:21:38",
+  "sklearn_version": "1.8.0",
+  "python_version": "3.13.5",
+  "source_rows": 110795,
+  "sampled_weak_rows": 12000,
+  "human_train_rows": 35,
+  "feature_matrix": [
+    12035,
+    20000
+  ],
+  "architecture": "45k stratified weak sample + all human train; TFIDF word1-2 + char3-5; SGD logloss; human_weight=75",
+  "action": {
+    "training_rows": 10835,
+    "classes": [
+      "chemical_handling",
+      "cleaning",
+      "confined_space",
+      "construction_installation",
+      "drilling_wellwork",
+      "driving",
+      "electrical_work",
+      "excavation",
+      "hot_work",
+      "inspection_testing",
+      "lifting",
+      "line_breaking",
+      "maintenance_repair",
+      "manual_tools",
+      "material_handling",
+      "pressure_testing",
+      "working_at_height"
+    ]
+  },
+  "object": {
+    "training_rows": 10252,
+    "classes": [
+      "chemical",
+      "confined_space",
+      "crane_lifting_equipment",
+      "electrical_cable",
+      "electrical_panel",
+      "gas_hydrocarbon",
+      "hand_tool",
+      "ladder",
+      "machinery",
+      "pipeline",
+      "pressure_vessel",
+      "pump",
+      "rotating_equipment",
+      "scaffold",
+      "tank",
+      "valve",
+      "vehicle",
+      "well_casing"
+    ]
+  },
+  "controls": {
+    "no_isolation": {
+      "positives": 69,
+      "sample_rows": 1069
+    },
+    "guarding_missing": {
+      "positives": 83,
+      "sample_rows": 1083
+    },
+    "ppe_missing": {
+      "positives": 20,
+      "sample_rows": 1020
+    },
+    "supervision_inadequate": {
+      "positives": 11,
+      "sample_rows": 1011
+    },
+    "barrier_failed": {
+      "positives": 34,
+      "sample_rows": 1034
+    },
+    "unknown_stored_energy": {
+      "positives": 5,
+      "sample_rows": 1005
+    }
+  },
+  "sif": {
+    "training_rows": 3915,
+    "positive_rate": 0.8909,
+    "source": "original weak SIF labels + human train"
+  }
+}

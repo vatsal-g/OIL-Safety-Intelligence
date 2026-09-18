@@ -1,0 +1,52 @@
+{
+  "rows": 105996,
+  "action_labelled": 73557,
+  "object_labelled": 84742,
+  "control_rows": 885,
+  "action_counts": {
+    "": 32439,
+    "driving": 25661,
+    "working_at_height": 15525,
+    "maintenance_repair": 7608,
+    "manual_tools": 5896,
+    "material_handling": 3255,
+    "electrical_work": 2922,
+    "lifting": 2634,
+    "construction_installation": 2036,
+    "chemical_handling": 1694,
+    "cleaning": 1605,
+    "drilling_wellwork": 1270,
+    "pressure_testing": 980,
+    "hot_work": 891,
+    "confined_space": 484,
+    "inspection_testing": 482,
+    "excavation": 420,
+    "line_breaking": 194
+  },
+  "object_counts": {
+    "vehicle": 44574,
+    "": 21254,
+    "machinery": 15833,
+    "ladder": 7278,
+    "crane_lifting_equipment": 3805,
+    "hand_tool": 3196,
+    "tank": 2548,
+    "scaffold": 1447,
+    "electrical_cable": 1215,
+    "chemical": 916,
+    "pressure_vessel": 711,
+    "rotating_equipment": 709,
+    "gas_hydrocarbon": 692,
+    "valve": 651,
+    "pump": 520,
+    "pipeline": 337,
+    "electrical_panel": 149,
+    "confined_space": 81,
+    "well_casing": 80
+  },
+  "sif_counts": {
+    "UNCERTAIN": 54443,
+    "SIF_POTENTIAL": 51424,
+    "NON_SIF_POTENTIAL": 129
+  }
+}

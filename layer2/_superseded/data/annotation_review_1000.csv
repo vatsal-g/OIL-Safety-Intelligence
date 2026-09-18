@@ -1,0 +1,9 @@
+human_sif_label,human_action,human_object,human_control_deficiency,human_iogp_rule
+0,unknown,unknown,none,none
+1,electrical_work,electrical_panel,no_isolation,Energy Isolation
+0,manual_tools,hand_tool,ppe_missing,none
+0,unknown,unknown,none,none
+0,driving,vehicle,none,Driving
+0,maintenance_repair,chemical,ppe_missing,none
+0,manual_tools,hand_tool,ppe_missing,none
+0,manual_tools,hand_tool,ppe_missing,none

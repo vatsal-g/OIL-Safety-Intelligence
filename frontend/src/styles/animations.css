@@ -1,0 +1,41 @@
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in {
+  animation: fadeUp 0.25s ease both;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.drawer-in {
+  animation: slideIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.bar-fill {
+  transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .drawer-in {
+    animation: none;
+  }
+  .bar-fill {
+    transition: none;
+  }
+}

@@ -3,6 +3,8 @@
 # 🛢️ OIL Safety Intelligence
 ### AI/NLP SIF Precursor Detection System
 
+**Smart India Hackathon 2026 · Problem Statement 26165 · Oil India Limited (OIL)**
+
 *Catches the safety reports that matter — before they become fatalities, not after.*
 
 <br/>
@@ -84,7 +86,7 @@
 
 </div>
 
-Oil and Gas Industry collects a large volume of Unsafe Act / Unsafe Condition (UA/UC) reports and Near-Miss reports from field operations. Today these are triaged **manually, on a monthly or quarterly review cycle** — far too slow for genuinely dangerous patterns. A precursor to a fatal incident can sit unreviewed for weeks while the underlying hazard stays live in the field.
+Oil India Limited (OIL) collects a large volume of Unsafe Act / Unsafe Condition (UA/UC) reports and Near-Miss reports from field operations. Today these are triaged **manually, on a monthly or quarterly review cycle** — far too slow for genuinely dangerous patterns. A precursor to a fatal incident can sit unreviewed for weeks while the underlying hazard stays live in the field.
 
 **Goal:** an automated, lightweight, explainable prototype that:
 - Identifies the roughly **20–25%** of reports carrying genuine fatal potential — true **SIFs** (Serious Injury and Fatality precursors)
@@ -201,7 +203,7 @@ OIL-Safety-Intelligence/
 │   │   └── routes/
 │   │       ├── reportRoute.js         # classify / list / detail / status-update endpoints
 │   │       └── systemStatusRoute.js   # GET /api/system/status aggregator
-│   |
+│   ├── tests/
 │   ├── server.js                      # Express entry point, mounts routes, caches Layer 1 self-test
 │   └── package.json
 │
@@ -538,5 +540,6 @@ VITE_API_BASE_URL="http://localhost:5000/api"
 
 <div align="center">
 
-*AI NLP SIH PRECURSOR DETECTION SYSTEM*
+Built for **SIH 2026 · PS 26165** — AI/NLP SIF Precursor Detection System for Oil India Limited.
+
 </div>

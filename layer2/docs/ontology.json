@@ -1,0 +1,5 @@
+{
+  "actions": ["pressure_testing","hot_work","confined_space","working_at_height","lifting","electrical_work","line_breaking","excavation","driving","chemical_handling","drilling_wellwork","maintenance_repair","material_handling","cleaning","inspection_testing","construction_installation","manual_tools"],
+  "control_deficiencies": ["no_isolation","no_permit","no_gas_test","missing_pressure_control","barrier_bypassed","jsa_missing","no_hazard_analysis","moc_missing","procedure_missing","procedure_not_followed","guarding_missing","ppe_missing","supervision_inadequate","wrong_rating","barrier_failed","communication_failure","exclusion_zone_missing","unknown_stored_energy"],
+  "iogp_life_saving_rules": ["Bypassing Safety Controls","Confined Space","Driving","Energy Isolation","Hot Work","Line of Fire","Safe Mechanical Lifting","Work at Height","Work Authorisation"]
+}
